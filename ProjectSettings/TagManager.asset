@@ -8,6 +8,9 @@ TagManager:
   - Teleport
   - Enemy
   - weapon
+  - crystal
+  - crysal
+  - GoHome
   layers:
   - Default
   - TransparentFX

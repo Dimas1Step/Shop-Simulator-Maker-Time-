@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class PlayerController : MonoBehaviour
     private float turnSpeed = 2f;
     public int HP = 100;
     public int crystal_count = 0;
+    private bool isPaused = false;
 
     private float verticalSpeed = 0f;
     private float mouseX;
@@ -29,11 +31,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Slider slider;
     [SerializeField] TMP_Text HP_Text;
     [SerializeField] TMP_Text Crystal_Text;
+    [SerializeField] private GameObject Die_Panel;
+    [SerializeField] private GameObject Pause_Panel;
 
     private void Start()
     {
+        LoadGame();
         slider.maxValue = HP;
             slider.value = HP;
+
+        Die_Panel.SetActive(false);
+        Pause_Panel.SetActive(false);
     }
 
     private void LateUpdate()
@@ -54,6 +62,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            PauseGame();
+        }
+
         RotateCharacter();
         MoveCharacter();
         ShopTeleport();
@@ -158,10 +171,16 @@ public class PlayerController : MonoBehaviour
             SceneManager.LoadScene("Forest");
         }
 
+        if (other.CompareTag("GoHome"))
+        {
+            SceneManager.LoadScene("Home");
+        }
+
         if (other.CompareTag("crystal"))
         {
             crystal_count += 1;
-            Destroy.other;
+            SaveGame();
+            Destroy(other.gameObject);
         }
     }
 
@@ -172,9 +191,86 @@ public class PlayerController : MonoBehaviour
             animator.SetTrigger("Die");
             animator.SetBool("IsGrounded", true);
             animator.SetFloat("Speed", 0f);
+
+            Die_Panel.SetActive(true);
+            SaveGame();
             this.enabled = false;
+
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
+
+    public void GoHome()
+    {
+        HP = 100;
+        crystal_count = crystal_count / 2;
+        SaveGame();
+        SceneManager.LoadScene("Home");
+    }
+
+    public void MainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void SaveGame()
+    {
+        int slot = PlayerPrefs.GetInt("CurrentSlot", 1);
+
+        PlayerPrefs.SetInt($"HP_{slot}", HP);
+        PlayerPrefs.SetInt($"Crystals_{slot}", crystal_count);
+
+        PlayerPrefs.SetString($"Time_{slot}",
+            DateTime.Now.ToString("dd.MM.yyyy HH:mm"));
+
+        PlayerPrefs.Save();
+
+        Debug.Log("Гру збережено");
+    }
+
+    public void LoadGame()
+    {
+        int slot = PlayerPrefs.GetInt("CurrentSlot", 1);
+
+        HP = PlayerPrefs.GetInt($"HP_{slot}", 100);
+        crystal_count = PlayerPrefs.GetInt($"Crystals_{slot}", 0);
+
+        Debug.Log("Гру завантажено");
+    }
+
+    public void PauseGame()
+    {
+        isPaused = !isPaused;
+
+        Pause_Panel.SetActive(isPaused);
+
+        if (isPaused)
+        {
+            Time.timeScale = 0f;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
+
+    public void ContinueGame()
+    {
+        Time.timeScale = 1f;
+
+        Die_Panel.SetActive(false);
+        Pause_Panel.SetActive(false);
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 }
