@@ -316,9 +316,6 @@ public class PlayerController : MonoBehaviour
 
     public void BuyWeapon()
     {
-        Debug.Log(current.cost);
-        Debug.Log(crystal_count >= current.cost);
-        Debug.Log(crystal_count);
         if (crystal_count >= current.cost)
         {
             for (int i = 0; i < Inventory.instance.ownedItems.Count; i++)
@@ -328,6 +325,7 @@ public class PlayerController : MonoBehaviour
                     return;
                 }
             }
+            crystal_count -= current.cost;
             Inventory.instance.ownedItems.Add(current.item.name);
         }
     }
@@ -354,7 +352,7 @@ public class PlayerController : MonoBehaviour
         if (current != null)
         {
             buyPanel.transform.Find("Cost_Text")
-                .GetComponent<TMP_Text>().text = current.cost.ToString();
+                .GetComponent<TMP_Text>().text = "Cost:" + current.cost.ToString();
 
         }
     }
