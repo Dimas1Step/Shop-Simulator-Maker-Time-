@@ -351,9 +351,8 @@ public class PlayerController : MonoBehaviour
 
         if (current != null)
         {
-            buyPanel.transform.Find("Cost_Text")
-                .GetComponent<TMP_Text>().text = "Cost:" + current.cost.ToString();
-
+            buyPanel.transform.Find("Cost_Text").GetComponent<TMP_Text>().text = "Cost:" + current.cost.ToString();
+            buyPanel.transform.Find("Name_Text").GetComponent<TMP_Text>().text = "Name:" + current.name; 
         }
     }
 

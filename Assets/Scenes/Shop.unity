@@ -2084,7 +2084,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 1779520246}
-  name: Sword
+  name: Sword_2
   cost: 10
 --- !u!1 &642591971 stripped
 GameObject:
@@ -2198,7 +2198,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 841371342}
-  name: Sword
+  name: Sword_3
   cost: 20
 --- !u!1001 &673327077
 PrefabInstance:
@@ -2389,7 +2389,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 584809528}
-  name: Sword
+  name: Sword_4
   cost: 30
 --- !u!1001 &694654131
 PrefabInstance:
@@ -3244,7 +3244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 913550790}
-  name: Sword
+  name: Sword_5
   cost: 40
 --- !u!1 &917404858 stripped
 GameObject:
@@ -5243,7 +5243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 1101516801}
-  name: Sword
+  name: Sword_1
   cost: 0
 --- !u!1001 &1524199928
 PrefabInstance:
@@ -7196,7 +7196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 1099115931}
-  name: Sword
+  name: Sword_6
   cost: 50
 --- !u!1001 &2050005492
 PrefabInstance:
