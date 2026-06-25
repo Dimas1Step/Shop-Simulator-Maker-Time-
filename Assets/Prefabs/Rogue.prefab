@@ -2231,7 +2231,7 @@ MonoBehaviour:
   healthSlider: {fileID: 995537090561484065}
   chaseDistance: 5
   attackDistance: 2
-  attackCooldown: 8
+  attackCooldown: 10
   drop:
   - {fileID: 5158198399357477329, guid: 37e5cf20972370244a78b9b27794c145, type: 3}
   dropCount: 2

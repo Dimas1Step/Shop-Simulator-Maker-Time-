@@ -553,12 +553,12 @@ MonoBehaviour:
   health: 10
   healthText: {fileID: 659487179263217537}
   healthSlider: {fileID: 816203069651007757}
-  chaseDistance: 5
-  attackDistance: 2
-  attackCooldown: 7
+  chaseDistance: 7
+  attackDistance: 3
+  attackCooldown: 6
   drop:
   - {fileID: 5158198399357477329, guid: 37e5cf20972370244a78b9b27794c145, type: 3}
-  dropCount: 3
+  dropCount: 4
   dropRadius: 1.5
 --- !u!195 &2289259369813038029
 NavMeshAgent:

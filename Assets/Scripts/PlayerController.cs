@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour
     private float jumpForce = 2f;
     private float turnSpeed = 2f;
     public int HP = 100;
-    public int crystal_count = 0;
+    public int crystal_count = 100;
+    public int cost;
     private bool isPaused = false;
 
     private float verticalSpeed = 0f;
@@ -25,6 +26,9 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
     private Animator animator;
 
+    string EQUIPE_NOT_SELECTED_TEXT = "";
+    GameObject currentEquipedItem;
+
     [SerializeField] private Camera goCamera;
     [SerializeField] private float interactDistance = 3f;
     [SerializeField] private string targetTag = "Shop";
@@ -33,12 +37,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] TMP_Text Crystal_Text;
     [SerializeField] private GameObject Die_Panel;
     [SerializeField] private GameObject Pause_Panel;
+    [SerializeField] public GameObject[] equipebleItems;
+    [SerializeField] GameObject buyPanel;
+    [SerializeField] Transform center;
+
+    public List<Sword> ownedItems;
+
+    ShopItem current;
+
 
     private void Start()
     {
         LoadGame();
         slider.maxValue = HP;
-            slider.value = HP;
+        slider.value = HP;
 
         Die_Panel.SetActive(false);
         Pause_Panel.SetActive(false);
@@ -71,6 +83,8 @@ public class PlayerController : MonoBehaviour
         MoveCharacter();
         ShopTeleport();
         Die();
+        CheckShopItem();
+        SwitchWeapon();
 
         animator.SetBool("IsGrounded", controller.isGrounded);
 
@@ -96,7 +110,7 @@ public class PlayerController : MonoBehaviour
 
     private void MoveCharacter()
     {
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
         {
             return;
         }
@@ -154,11 +168,19 @@ public class PlayerController : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactDistance))
         {
-            if (hit.collider.CompareTag(targetTag))
+            if (hit.collider.CompareTag("Shop"))
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     SceneManager.LoadScene("Shop");
+                }
+            }
+
+            if (hit.collider.CompareTag("FromShop"))
+            {
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    SceneManager.LoadScene("Home");
                 }
             }
         }
@@ -186,7 +208,7 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
-        if(HP <= 0)
+        if (HP <= 0)
         {
             animator.SetTrigger("Die");
             animator.SetBool("IsGrounded", true);
@@ -239,7 +261,7 @@ public class PlayerController : MonoBehaviour
         int slot = PlayerPrefs.GetInt("CurrentSlot", 1);
 
         HP = PlayerPrefs.GetInt($"HP_{slot}", 100);
-        crystal_count = PlayerPrefs.GetInt($"Crystals_{slot}", 0);
+        crystal_count = PlayerPrefs.GetInt($"Crystals_{slot}", 100);
 
         Debug.Log("Гру завантажено");
     }
@@ -258,6 +280,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            Time.timeScale = 1f;
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -272,5 +295,93 @@ public class PlayerController : MonoBehaviour
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    private void EquipItem(string toolName)
+    {
+        foreach (GameObject tool in equipebleItems)
+        {
+            if (tool.name == toolName)
+            {
+                tool.SetActive(true);
+                currentEquipedItem = tool;
+                toolName = EQUIPE_NOT_SELECTED_TEXT;
+            }
+            else
+            {
+                tool.SetActive(false);
+            }
+        }
+    }
+
+    public void BuyWeapon()
+    {
+        Debug.Log(current.cost);
+        Debug.Log(crystal_count >= current.cost);
+        Debug.Log(crystal_count);
+        if (crystal_count >= current.cost)
+        {
+            for (int i = 0; i < Inventory.instance.ownedItems.Count; i++)
+            {
+                if (Inventory.instance.ownedItems[i] == current.item.name)
+                {
+                    return;
+                }
+            }
+            Inventory.instance.ownedItems.Add(current.item.name);
+        }
+    }
+
+    void CheckShopItem()
+    {
+        current = null;
+
+        Collider[] hits = Physics.OverlapSphere(center.position, 1f);
+
+        foreach (var hit in hits)
+        {
+            if (hit.TryGetComponent<ShopItem>(out ShopItem data))
+            {
+                current = data;
+                break;
+            }
+        }
+
+        buyPanel.SetActive(current != null);
+        Cursor.lockState = current != null ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = current != null;
+
+        if (current != null)
+        {
+            buyPanel.transform.Find("Cost_Text")
+                .GetComponent<TMP_Text>().text = current.cost.ToString();
+
+        }
+    }
+
+    void SwitchWeapon()
+    {
+        for (int i = 0; i <= 9; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha0 + i))
+            {
+                Debug.Log("Натиснута цифра: " + i);
+                foreach (GameObject item in equipebleItems)
+                {
+                    item.SetActive(false);
+                }
+
+                if (i > Inventory.instance.ownedItems.Count) return;
+                for (int j = 0; j < equipebleItems.Length; j++)
+                {
+                    if (equipebleItems[j].name == Inventory.instance.ownedItems[i - 1])
+                    {
+                        equipebleItems[j].SetActive(true);
+                    }
+                }
+
+
+            }
+        }
     }
 }

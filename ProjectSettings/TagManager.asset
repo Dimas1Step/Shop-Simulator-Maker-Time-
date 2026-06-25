@@ -11,6 +11,7 @@ TagManager:
   - crystal
   - crysal
   - GoHome
+  - FromShop
   layers:
   - Default
   - TransparentFX
