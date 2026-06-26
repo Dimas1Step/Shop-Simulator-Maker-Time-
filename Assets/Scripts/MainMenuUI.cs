@@ -6,6 +6,12 @@ public class MainMenuUI : MonoBehaviour
 {
     public GameObject mainPanel;
     public GameObject continuePanel;
+    public AudioSource audio;
+
+    void Start()
+    {
+        audio = FindObjectOfType<AudioSource>();
+    }
 
     public void OpenContinuePanel()
     {
@@ -22,5 +28,10 @@ public class MainMenuUI : MonoBehaviour
     public void Quit()
     {
         Application.Quit();
+    }
+
+    public void Audio()
+    {
+        audio.Play();
     }
 }

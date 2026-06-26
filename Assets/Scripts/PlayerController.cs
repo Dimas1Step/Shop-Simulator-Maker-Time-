@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using Unity.VisualScripting;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,7 +16,6 @@ public class PlayerController : MonoBehaviour
     private float turnSpeed = 2f;
     public int HP = 100;
     public int crystal_count = 100;
-    public int cost;
     private bool isPaused = false;
 
     private float verticalSpeed = 0f;
@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour
 
     private CharacterController controller;
     private Animator animator;
+    public AudioSource audio;
 
     string EQUIPE_NOT_SELECTED_TEXT = "";
     GameObject currentEquipedItem;
@@ -35,13 +36,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Slider slider;
     [SerializeField] TMP_Text HP_Text;
     [SerializeField] TMP_Text Crystal_Text;
+    [SerializeField] TMP_Text E_Text;
     [SerializeField] private GameObject Die_Panel;
     [SerializeField] private GameObject Pause_Panel;
     [SerializeField] public GameObject[] equipebleItems;
     [SerializeField] GameObject buyPanel;
-    [SerializeField] Transform center;
-
-    public List<Sword> ownedItems;
+    [SerializeField] Transform center;  
 
     ShopItem current;
 
@@ -54,13 +54,14 @@ public class PlayerController : MonoBehaviour
 
         Die_Panel.SetActive(false);
         Pause_Panel.SetActive(false);
+        audio = GetComponent<AudioSource>();
     }
 
     private void LateUpdate()
     {
         slider.value = HP;
         HP_Text.text = "HP:" + HP;
-        Crystal_Text.text = "crystal:" + crystal_count;
+        Crystal_Text.text = "crystal:" + Inventory.instance.crystal_count;
     }
 
     void Awake()
@@ -83,7 +84,7 @@ public class PlayerController : MonoBehaviour
         MoveCharacter();
         ShopTeleport();
         Die();
-        CheckShopItem();
+        if (!Pause_Panel.activeSelf) CheckShopItem();
         SwitchWeapon();
 
         animator.SetBool("IsGrounded", controller.isGrounded);
@@ -96,6 +97,7 @@ public class PlayerController : MonoBehaviour
 
     private void RotateCharacter()
     {
+        if(Pause_Panel.activeSelf) return;
         mouseX = Input.GetAxis("Mouse X");
         mouseY = Input.GetAxis("Mouse Y");
 
@@ -166,10 +168,13 @@ public class PlayerController : MonoBehaviour
         Ray ray = new Ray(goCamera.transform.position, goCamera.transform.forward);
         RaycastHit hit;
 
+        E_Text.gameObject.SetActive(false);
+
         if (Physics.Raycast(ray, out hit, interactDistance))
         {
             if (hit.collider.CompareTag("Shop"))
             {
+                E_Text.gameObject.SetActive(true);
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     SceneManager.LoadScene("Shop");
@@ -178,6 +183,7 @@ public class PlayerController : MonoBehaviour
 
             if (hit.collider.CompareTag("FromShop"))
             {
+                E_Text.gameObject.SetActive(true);
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     SceneManager.LoadScene("Home");
@@ -200,7 +206,7 @@ public class PlayerController : MonoBehaviour
 
         if (other.CompareTag("crystal"))
         {
-            crystal_count += 1;
+            Inventory.instance.crystal_count += 1;
             SaveGame();
             Destroy(other.gameObject);
         }
@@ -231,7 +237,7 @@ public class PlayerController : MonoBehaviour
     public void GoHome()
     {
         HP = 100;
-        crystal_count = crystal_count / 2;
+        Inventory.instance.crystal_count = Inventory.instance.crystal_count / 2;
         SaveGame();
         SceneManager.LoadScene("Home");
     }
@@ -246,14 +252,12 @@ public class PlayerController : MonoBehaviour
         int slot = PlayerPrefs.GetInt("CurrentSlot", 1);
 
         PlayerPrefs.SetInt($"HP_{slot}", HP);
-        PlayerPrefs.SetInt($"Crystals_{slot}", crystal_count);
+        PlayerPrefs.SetInt($"Crystals_{slot}", Inventory.instance.crystal_count);
 
         PlayerPrefs.SetString($"Time_{slot}",
             DateTime.Now.ToString("dd.MM.yyyy HH:mm"));
 
         PlayerPrefs.Save();
-
-        Debug.Log("Гру збережено");
     }
 
     public void LoadGame()
@@ -262,8 +266,6 @@ public class PlayerController : MonoBehaviour
 
         HP = PlayerPrefs.GetInt($"HP_{slot}", 100);
         crystal_count = PlayerPrefs.GetInt($"Crystals_{slot}", 100);
-
-        Debug.Log("Гру завантажено");
     }
 
     public void PauseGame()
@@ -325,7 +327,7 @@ public class PlayerController : MonoBehaviour
                     return;
                 }
             }
-            crystal_count -= current.cost;
+            Inventory.instance.crystal_count -= current.cost;
             Inventory.instance.ownedItems.Add(current.item.name);
         }
     }
@@ -334,7 +336,7 @@ public class PlayerController : MonoBehaviour
     {
         current = null;
 
-        Collider[] hits = Physics.OverlapSphere(center.position, 1f);
+        Collider[] hits = Physics.OverlapSphere(center.position, 2f);
 
         foreach (var hit in hits)
         {
@@ -362,7 +364,6 @@ public class PlayerController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Alpha0 + i))
             {
-                Debug.Log("Натиснута цифра: " + i);
                 foreach (GameObject item in equipebleItems)
                 {
                     item.SetActive(false);
@@ -380,5 +381,10 @@ public class PlayerController : MonoBehaviour
 
             }
         }
+    }
+
+    public void PlayAudio()
+    {
+        audio.Play();
     }
 }
